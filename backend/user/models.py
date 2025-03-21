@@ -1,0 +1,48 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+# Create your models here.
+
+
+class Team(AbstractUser):
+    register_completed = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Team"
+        verbose_name_plural = "Teams"
+
+    def __str__(self):
+        res = ""
+        for team_member in TeamMember.objects.filter(team=self):
+            res += str(team_member)+" "
+        return self.username+":"+res
+
+
+class TeamMember(models.Model):
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=15)
+    team = models.ForeignKey(
+        Team, on_delete=models.CASCADE, related_name='members')
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+
+
+class StaffTeam(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class StaffMember(models.Model):
+    staff_team = models.ForeignKey(
+        StaffTeam, on_delete=models.CASCADE, related_name='members')
+    name = models.CharField(max_length=100)
+    image = models.ImageField(
+        upload_to='staff_member_images/', null=True, blank=True)
+
+    def __str__(self):
+        return self.name

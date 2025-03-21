@@ -1,0 +1,47 @@
+version: '3.9'
+
+volumes:
+  postgres-db:
+  static_volume:
+  media_volume:
+
+
+services:
+
+  nginx:
+    build: ./nginx
+    image: nginx
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+
+  postgres:
+    image: postgres:13
+    expose:
+      - 5432:5432
+
+    env_file:
+      - .env.database
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+  backend:
+    build: backend
+    image: back
+    env_file:
+      - .env.backend
+    expose:
+      - "8000:8000"
+    restart: always
+    container_name: back
+    depends_on:
+      - postgres
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+
+    command: sh -c './wait-for-it.sh postgres:5432 -- python manage.py makemigrations --noinput && python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn backend.wsgi:application --bind 0.0.0.0:8001'
