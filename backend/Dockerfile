@@ -1,4 +1,4 @@
-FROM python:1
+FROM python
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y \
