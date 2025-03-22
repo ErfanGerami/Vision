@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     libffi-dev \
     gcc
+RUN pip install --upgrade pip setuptools wheel
 
 RUN pip install psycopg2-binary==2.9.3
 
