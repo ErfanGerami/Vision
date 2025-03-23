@@ -11,6 +11,8 @@ urlpatterns = [
     path('captcha/', GetCaptchaView.as_view(), name='captcha'),
     path('recaptcha-site-key/', GetRecaptchaSiteKey.as_view(),
          name='recaptcha_site_key'),
-    path('registration-test/', registration_test,
-         name='registration_test'),  # Add this line
+    path('registration-test/', registration_test, name='registration_test'),
+    path('verify-email/', VarifyEmail.as_view(),
+         name='verify_email'),  # Add this line
+    path('send-mail/', SendEmail.as_view(), name='send_mail')
 ]

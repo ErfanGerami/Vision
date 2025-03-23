@@ -13,25 +13,18 @@ from captcha.helpers import captcha_image_url
 import requests
 from django.conf import settings
 import logging
-
-logger = logging.getLogger(__name__)
+from django_redis import get_redis_connection
+import random
+from .permissions import IsVerifiedTeam
+from .helpers import *
+redis_conn = get_redis_connection("default")
 
 
 class TeamRegisterView(APIView):
     def post(self, request):
-        recaptcha_response = request.data.get('g-recaptcha-response')
-        if not recaptcha_response:
-            return Response({'error': 'Captcha is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        secret_key = getattr(settings, 'RECAPTCHA_SECRET_KEY', '')
-        google_url = 'https://www.google.com/recaptcha/api/siteverify'
-        r = requests.post(google_url, data={
-            'secret': secret_key,
-            'response': recaptcha_response
-        })
-        result = r.json()
-        if not result.get('success'):
-            return Response({'error': 'Invalid captcha'}, status=status.HTTP_400_BAD_REQUEST)
+        # result, res = check_captcha(request=request)
+        # if (not result):
+        #     return res
 
         team_name = request.data.get('username')
         team_password = request.data.get('password')
@@ -49,7 +42,8 @@ class TeamRegisterView(APIView):
         if len(members_data) != 3:
             return Response({'error': 'Exactly 3 members are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        for member in members_data:
+        for member_index in range(len(members_data)):
+            member = members_data[member_index]
             # team.delete works because members will cascade
             if (not member.get('first_name') or not member.get('last_name') or not member.get('email') or not member.get('phone_number')):
                 team.delete()
@@ -57,12 +51,16 @@ class TeamRegisterView(APIView):
             if (TeamMember.objects.filter(email=member.get('email')).exists()):
                 team.delete()
                 return Response({'error': f"Member with email {member.get('email')} already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            leader = False
+            if (member_index == 0):
+                leader = True
             TeamMember.objects.create(
                 team=team,
                 first_name=member.get('first_name', ''),
                 last_name=member.get('last_name', ''),
                 email=member.get('email', ''),
                 phone_number=member.get('phone_number', ''),
+                leader=leader
             )
 
         return Response({
@@ -87,7 +85,7 @@ class GetStaffView(generics.ListAPIView):
 
 class GetTeamView(generics.ListAPIView):
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Update this line
 
     def get_queryset(self):
         return [self.request.user]
@@ -96,8 +94,48 @@ class GetTeamView(generics.ListAPIView):
 class GetRecaptchaSiteKey(APIView):
     def get(self, request):
         site_key = settings.RECAPTCHA_SITE_KEY
-        logger.info(f"Providing site key: {site_key}")
         return Response({'site_key': site_key})
+
+
+class SendEmail(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        team = self.request.user
+        if (team.verification_completed):
+            return Response({'error': 'team already verified'}, status=status.HTTP_400_BAD_REQUEST)
+        if (redis_conn.get(team.id)):
+            expiration_time = getattr(settings, 'REDIS_EXPIRATION', 300)
+            return Response({'error': f'verification code have been sent to you recently wait for {expiration_time/60} minutes and try again'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            email(redis_conn, team)
+            return Response({'message': 'Verification code sent to your email'}, status=status.HTTP_200_OK)
+
+
+class VarifyEmail(APIView):
+    permission_classes = {IsAuthenticated}
+
+    def post(self, request):
+
+        if (not request.data.get('verification_code')):
+            return Response({'error': 'Verification code is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        verification_code = redis_conn.get(self.request.user.id)
+        if verification_code:
+            verification_code = int(verification_code)
+        else:
+            return Response({'error': 'Verification code not found or expired'}, status=status.HTTP_404_NOT_FOUND)
+        if (verification_code == int(request.data.get('verification_code'))):
+            team = self.request.user
+
+            setattr(team, "verification_completed", True)
+            team.save()
+
+            print(team)
+            return Response({'message': 'Verified'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Verification code doesnt match'}, status=status.HTTP_404_NOT_FOUND)
 
 
 def registration_test(request):

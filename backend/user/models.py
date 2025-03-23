@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser
 
 class Team(AbstractUser):
     register_completed = models.BooleanField(default=False)
+    verification_completed = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Team"
@@ -15,7 +16,7 @@ class Team(AbstractUser):
         res = ""
         for team_member in TeamMember.objects.filter(team=self):
             res += str(team_member)+" "
-        return self.username+":"+res
+        return ("✔ " if self.verification_completed else "❌ ")+("✔ " if self.register_completed else "❌ ")+self.username+":"+res
 
 
 class TeamMember(models.Model):
@@ -25,6 +26,7 @@ class TeamMember(models.Model):
     phone_number = models.CharField(max_length=15)
     team = models.ForeignKey(
         Team, on_delete=models.CASCADE, related_name='members')
+    leader = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
