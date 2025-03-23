@@ -11,12 +11,11 @@ RUN apt-get update && apt-get install -y \
     gcc
 RUN pip install --upgrade pip setuptools wheel
 
+RUN pip install psycopg
 
 COPY ./requirements.txt .
 
 RUN pip install -r requirements.txt
-
-RUN pip install psycopg
 
 RUN pip install gunicorn
 
