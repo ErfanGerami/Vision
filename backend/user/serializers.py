@@ -38,4 +38,5 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        fields = ['id', 'username', 'members']
+        fields = ['id', 'username', 'members',
+                  'verification_completed', 'register_completed']

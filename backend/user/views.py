@@ -84,12 +84,12 @@ class GetStaffView(generics.ListAPIView):
     queryset = StaffTeam.objects.all()
 
 
-class GetTeamView(generics.ListAPIView):
+class GetTeamView(generics.RetrieveAPIView):
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]  # Update this line
 
-    def get_queryset(self):
-        return [self.request.user]
+    def get_object(self):
+        return self.request.user
 
 
 class GetRecaptchaSiteKey(APIView):
