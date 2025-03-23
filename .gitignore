@@ -1,3 +1,5 @@
 backend/db.sqlite
 env/
 backend/media
+.env.backend
+.env.database

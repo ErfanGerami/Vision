@@ -22,9 +22,9 @@ redis_conn = get_redis_connection("default")
 
 class TeamRegisterView(APIView):
     def post(self, request):
-        # result, res = check_captcha(request=request)
-        # if (not result):
-        #     return res
+        result, res = check_captcha(request=request)
+        if (not result):
+            return res
 
         team_name = request.data.get('username')
         team_password = request.data.get('password')
