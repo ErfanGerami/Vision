@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Registration</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        let siteKey = '';
+
+        async function onRecaptchaLoad() {
+            try {
+                const resp = await fetch('http://localhost:8000/api/recaptcha-site-key/');
+                const data = await resp.json();
+                siteKey = data.site_key || '';
+                console.log('Site Key:', siteKey); // Debugging line to ensure site key is fetched
+                if (typeof grecaptcha !== 'undefined') {
+                    grecaptcha.ready(() => {
+                        grecaptcha.render('recaptcha', {
+                            'sitekey': siteKey
+                        });
+                    });
+                } else {
+                    console.error('grecaptcha is not defined');
+                }
+
+                document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+
+                    const memberNodes = document.querySelectorAll('.member');
+                    const members = [...memberNodes].map((node) => ({
+                        first_name: node.querySelector('.first_name').value,
+                        last_name: node.querySelector('.last_name').value,
+                        email: node.querySelector('.email').value,
+                        phone_number: node.querySelector('.phone_number').value,
+                    }));
+
+                    const token = grecaptcha.getResponse();
+                    if (!token) {
+                        console.error('reCAPTCHA not completed');
+                        alert('Please complete the reCAPTCHA');
+                        return;
+                    }
+                    console.log('reCAPTCHA Token:', token); // Debugging line to ensure token is generated
+                    try {
+                        const response = await fetch('http://localhost:8000/api/register/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                username,
+                                password,
+                                'g-recaptcha-response': token,
+                                members
+                            })
+                        });
+                        const data = await response.json();
+                        console.log('Response:', data);
+                        alert('Registration successful: ' + JSON.stringify(data));
+                    } catch (error) {
+                        console.error('Error during registration:', error);
+                        alert('Error during registration: ' + error.message);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error fetching site key:', error);
+                alert('Error fetching site key: ' + error.message);
+            }
+        }
+
+        window.onload = onRecaptchaLoad;
+    </script>
+</head>
+
+<body>
+    <h1>Quick Registration Test</h1>
+    <form id="registrationForm">
+        <label>Username: <input type="text" id="username" required /></label><br>
+        <label>Password: <input type="password" id="password" required /></label><br>
+        <h3>Members (3 required)</h3>
+        <div class="member">
+            <label>First Name: <input type="text" class="first_name" required /></label><br>
+            <label>Last Name: <input type="text" class="last_name" required /></label><br>
+            <label>Email: <input type="email" class="email" required /></label><br>
+            <label>Phone Number: <input type="text" class="phone_number" required /></label><br>
+        </div>
+        <div id="recaptcha" class="g-recaptcha"></div><br>
+        <button type="submit">Register</button>
+    </form>
+</body>
+
+</html>

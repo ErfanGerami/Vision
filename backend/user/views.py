@@ -8,10 +8,31 @@ from .models import TeamMember
 from .serializers import *
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from captcha.models import CaptchaStore
+from captcha.helpers import captcha_image_url
+import requests
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TeamRegisterView(APIView):
     def post(self, request):
+        recaptcha_response = request.data.get('g-recaptcha-response')
+        if not recaptcha_response:
+            return Response({'error': 'Captcha is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        secret_key = getattr(settings, 'RECAPTCHA_SECRET_KEY', '')
+        google_url = 'https://www.google.com/recaptcha/api/siteverify'
+        r = requests.post(google_url, data={
+            'secret': secret_key,
+            'response': recaptcha_response
+        })
+        result = r.json()
+        if not result.get('success'):
+            return Response({'error': 'Invalid captcha'}, status=status.HTTP_400_BAD_REQUEST)
+
         team_name = request.data.get('username')
         team_password = request.data.get('password')
 
@@ -51,6 +72,14 @@ class TeamRegisterView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+class GetCaptchaView(APIView):
+    def get(self, request):
+        new_captcha = CaptchaStore.generate_key()
+        key = new_captcha.hashkey
+        image_url = captcha_image_url(key)
+        return Response({'captcha_key': key, 'captcha_image_url': image_url})
+
+
 class GetStaffView(generics.ListAPIView):
     serializer_class = StaffSerializer
     queryset = StaffTeam.objects.all()
@@ -62,3 +91,14 @@ class GetTeamView(generics.ListAPIView):
 
     def get_queryset(self):
         return [self.request.user]
+
+
+class GetRecaptchaSiteKey(APIView):
+    def get(self, request):
+        site_key = settings.RECAPTCHA_SITE_KEY
+        logger.info(f"Providing site key: {site_key}")
+        return Response({'site_key': site_key})
+
+
+def registration_test(request):
+    return render(request, 'test.html')
