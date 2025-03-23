@@ -45,7 +45,7 @@ class TeamRegisterView(APIView):
         for member_index in range(len(members_data)):
             member = members_data[member_index]
             # team.delete works because members will cascade
-            if (not member.get('first_name') or not member.get('last_name') or not member.get('email') or not member.get('phone_number')):
+            if (not member.get('first_name') or not member.get('stdnumber') or not member.get('last_name') or not member.get('email') or not member.get('phone_number')):
                 team.delete()
                 return Response({'error': 'All member fields are required'}, status=status.HTTP_400_BAD_REQUEST)
             if (TeamMember.objects.filter(email=member.get('email')).exists()):
@@ -60,6 +60,7 @@ class TeamRegisterView(APIView):
                 last_name=member.get('last_name', ''),
                 email=member.get('email', ''),
                 phone_number=member.get('phone_number', ''),
+                student_number=member.get('stdnumber', ''),
                 leader=leader
             )
 
