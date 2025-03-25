@@ -58,6 +58,8 @@ class StaffMember(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(
         upload_to='staff_member_images/', null=True, blank=True)
+    description = models.CharField(max_length=512, null=True, blank=True)
+    role = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.name
