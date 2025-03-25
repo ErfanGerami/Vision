@@ -17,11 +17,13 @@ from django_redis import get_redis_connection
 import random
 from .permissions import IsVerifiedTeam
 from .helpers import *
+import json
 redis_conn = get_redis_connection("default")
 
 
 class TeamRegisterView(APIView):
     def post(self, request):
+        print(request.data)
         result, res = check_captcha(request=request)
         if (not result):
             return res
@@ -35,19 +37,45 @@ class TeamRegisterView(APIView):
             return Response({'error': 'Team with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
         user_model = get_user_model()
         team = user_model.objects.create_user(
-            username=team_name, password=team_password)
+            username=team_name, password=team_password
+        )
         refresh = RefreshToken.for_user(team)
 
-        members_data = request.data.get('members', [])
-        if len(members_data) != 3:
+        raw_members = request.data.get('members', '[]')
+        if isinstance(raw_members, str):
+            try:
+                members_data = json.loads(raw_members)
+            except json.JSONDecodeError:
+                team.delete()
+                return Response({'error': 'Invalid members JSON'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            members_data = raw_members
+
+        if not isinstance(members_data, list) or len(members_data) != 3:
+            team.delete()
             return Response({'error': 'Exactly 3 members are required'}, status=status.HTTP_400_BAD_REQUEST)
+        payment_image = request.FILES.get('payment_image', None)
+        if not payment_image:
+            team.delete()
+            return Response({'error': 'payment image is required'}, status=status.HTTP_400_BAD_REQUEST)
+        setattr(team, "payment", payment_image)
+        team.save()
 
         for member_index in range(len(members_data)):
+
             member = members_data[member_index]
             # team.delete works because members will cascade
-            if (not member.get('first_name') or not member.get('stdnumber') or not member.get('last_name') or not member.get('email') or not member.get('phone_number')):
+            if (not member.get('first_name') or not member.get('stdnumber') or not member.get('last_name') or not member.get('email') or not member.get('phone_number') or not member.get('major') or not member.get('year') or not member.get('university')):
                 team.delete()
                 return Response({'error': 'All member fields are required'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                year = int(member.get('year'))
+            except:
+                team.delete()
+                return Response({'error': 'year must be integer'}, status=status.HTTP_400_BAD_REQUEST)
+            if (year > 1404 or year < 1000):
+                team.delete()
+                return Response({'error': 'Invalid year'}, status=status.HTTP_400_BAD_REQUEST)
             if (TeamMember.objects.filter(email=member.get('email')).exists()):
                 team.delete()
                 return Response({'error': f"Member with email {member.get('email')} already exists"}, status=status.HTTP_400_BAD_REQUEST)
@@ -61,7 +89,10 @@ class TeamRegisterView(APIView):
                 email=member.get('email', ''),
                 phone_number=member.get('phone_number', ''),
                 student_number=member.get('stdnumber', ''),
-                leader=leader
+                leader=leader,
+                major=member.get('major', ''),
+                year=int(member.get('year', '')),
+                university=member.get('university', '')
             )
 
         return Response({

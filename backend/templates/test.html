@@ -27,6 +27,7 @@
                     e.preventDefault();
                     const username = document.getElementById('username').value;
                     const password = document.getElementById('password').value;
+                    const paymentImage = document.getElementById('payment_image').files[0];
 
                     const memberNodes = document.querySelectorAll('.member');
                     const members = [...memberNodes].map((node) => ({
@@ -34,6 +35,10 @@
                         last_name: node.querySelector('.last_name').value,
                         email: node.querySelector('.email').value,
                         phone_number: node.querySelector('.phone_number').value,
+                        stdnumber: node.querySelector('.stdnumber').value,
+                        major: node.querySelector('.major').value,
+                        university: node.querySelector('.university').value,
+                        year: node.querySelector('.year').value
                     }));
 
                     const token = grecaptcha.getResponse();
@@ -43,16 +48,20 @@
                         return;
                     }
                     console.log('reCAPTCHA Token:', token); // Debugging line to ensure token is generated
+                    const formData = new FormData();
+                    formData.append('username', username);
+                    formData.append('password', password);
+                    formData.append('g-recaptcha-response', token);
+                    if (paymentImage) {
+                        formData.append('payment_image', paymentImage);
+                    }
+                    // Send entire array under a single key
+                    formData.append('members', JSON.stringify(members));
+                    console.log('Form Data:', formData); // Debugging line to ensure form data is correct
                     try {
                         const response = await fetch('http://localhost:8000/api/register/', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                username,
-                                password,
-                                'g-recaptcha-response': token,
-                                members
-                            })
+                            body: formData
                         });
                         const data = await response.json();
                         console.log('Response:', data);
@@ -69,22 +78,51 @@
             }
         }
 
-        window.onload = onRecaptchaLoad;
+        document.addEventListener('DOMContentLoaded', onRecaptchaLoad);
     </script>
 </head>
 
 <body>
     <h1>Quick Registration Test</h1>
-    <form id="registrationForm">
+    <form id="registrationForm" enctype="multipart/form-data">
         <label>Username: <input type="text" id="username" required /></label><br>
         <label>Password: <input type="password" id="password" required /></label><br>
-        <h3>Members (3 required)</h3>
+        <h3>Member 1</h3>
         <div class="member">
             <label>First Name: <input type="text" class="first_name" required /></label><br>
             <label>Last Name: <input type="text" class="last_name" required /></label><br>
             <label>Email: <input type="email" class="email" required /></label><br>
             <label>Phone Number: <input type="text" class="phone_number" required /></label><br>
+            <label>Student Number: <input type="text" class="stdnumber" required /></label><br>
+            <label>Major: <input type="text" class="major" required /></label><br>
+            <label>University: <input type="text" class="university" required /></label><br>
+            <label>Year: <input type="number" class="year" required /></label><br>
         </div>
+
+        <h3>Member 2</h3>
+        <div class="member">
+            <label>First Name: <input type="text" class="first_name" required /></label><br>
+            <label>Last Name: <input type="text" class="last_name" required /></label><br>
+            <label>Email: <input type="email" class="email" required /></label><br>
+            <label>Phone Number: <input type="text" class="phone_number" required /></label><br>
+            <label>Student Number: <input type="text" class="stdnumber" required /></label><br>
+            <label>Major: <input type="text" class="major" required /></label><br>
+            <label>University: <input type="text" class="university" required /></label><br>
+            <label>Year: <input type="number" class="year" required /></label><br>
+        </div>
+
+        <h3>Member 3</h3>
+        <div class="member">
+            <label>First Name: <input type="text" class="first_name" required /></label><br>
+            <label>Last Name: <input type="text" class="last_name" required /></label><br>
+            <label>Email: <input type="email" class="email" required /></label><br>
+            <label>Phone Number: <input type="text" class="phone_number" required /></label><br>
+            <label>Student Number: <input type="text" class="stdnumber" required /></label><br>
+            <label>Major: <input type="text" class="major" required /></label><br>
+            <label>University: <input type="text" class="university" required /></label><br>
+            <label>Year: <input type="number" class="year" required /></label><br>
+        </div>
+        <label>Payment Image: <input type="file" id="payment_image" /></label><br>
         <div id="recaptcha" class="g-recaptcha"></div><br>
         <button type="submit">Register</button>
     </form>
