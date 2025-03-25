@@ -9,7 +9,7 @@
 
         async function onRecaptchaLoad() {
             try {
-                const resp = await fetch('http://http://iutcvc.chickenkiller.com//api/recaptcha-site-key/');
+                const resp = await fetch('http://iutcvc.chickenkiller.com/api/recaptcha-site-key/');
                 const data = await resp.json();
                 siteKey = data.site_key || '';
                 console.log('Site Key:', siteKey); // Debugging line to ensure site key is fetched
@@ -59,7 +59,7 @@
                     formData.append('members', JSON.stringify(members));
                     console.log('Form Data:', formData); // Debugging line to ensure form data is correct
                     try {
-                        const response = await fetch('http://http://iutcvc.chickenkiller.com//api/register/', {
+                        const response = await fetch('http://iutcvc.chickenkiller.com/api/register/', {
                             method: 'POST',
                             body: formData
                         });
