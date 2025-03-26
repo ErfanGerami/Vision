@@ -21,7 +21,7 @@ services:
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
-      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/conf:/etc/letsencrypt/live
       - ./data/certbot/www:/var/www/certbot
 
   postgres:
