@@ -17,7 +17,7 @@ services:
     depends_on:
       - backend
       - certbot
-      - frontend
+    # - frontend
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
