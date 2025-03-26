@@ -21,7 +21,7 @@ services:
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
-      - ./data/certbot/conf:/etc/letsencrypt/live
+      - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
 
   postgres:
@@ -45,7 +45,7 @@ services:
     env_file:
       - .env.backend
     expose:
-      - "8000:8000"
+      - "8001:8001"
     restart: always
     container_name: back
     depends_on:
