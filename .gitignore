@@ -3,3 +3,5 @@ env/
 backend/media
 .env.backend
 .env.database
+data/
+certbot/
