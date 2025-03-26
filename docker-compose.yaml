@@ -64,7 +64,6 @@ services:
       - "3000:3000"
     restart: always
   certbot:
-    certbot:
     image: certbot/certbot
     container_name: certbot
     volumes:
