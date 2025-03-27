@@ -127,7 +127,6 @@ class SendEmail(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-
         team = self.request.user
         if (team.verification_completed):
             return Response({'error': 'team already verified'}, status=status.HTTP_400_BAD_REQUEST)
