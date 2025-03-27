@@ -14,8 +14,7 @@ class Team(AbstractUser):
         ext = filename.split('.')[-1]
         filename = f"{instance.id}_{uuid.uuid4()}.{ext}"
         return os.path.join('payment_images/', filename)
-    payment = models.ImageField(
-        upload_to=payment_image_upload_to, null=True, blank=True)
+    payment_number = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         verbose_name = "Team"

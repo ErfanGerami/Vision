@@ -23,10 +23,9 @@ redis_conn = get_redis_connection("default")
 
 class TeamRegisterView(APIView):
     def post(self, request):
-        print(request.data)
-        result, res = check_captcha(request=request)
-        if (not result):
-            return res
+        # result, res = check_captcha(request=request)
+        # if (not result):
+        #     return res
 
         team_name = request.data.get('username')
         team_password = request.data.get('password')
@@ -41,25 +40,20 @@ class TeamRegisterView(APIView):
         )
         refresh = RefreshToken.for_user(team)
 
-        raw_members = request.data.get('members', '[]')
-        if isinstance(raw_members, str):
-            try:
-                members_data = json.loads(raw_members)
-            except json.JSONDecodeError:
-                team.delete()
-                return Response({'error': 'Invalid members JSON'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            members_data = raw_members
+        payment = request.data.get("payment")
+        if not payment or payment == '':
+            team.delete()
+            return Response({'error': 'team payment number is requiered'}, status=status.HTTP_400_BAD_REQUEST)
+        if (Team.objects.filter(payment_number=payment).exists()):
+            team.delete()
+            return Response({'error': 'cant register a payment for two registers'}, status=status.HTTP_400_BAD_REQUEST)
+        setattr(team, "payment_number", payment)
+        team.save()
+        members_data = request.data.get('members', '[]')
 
-        if not isinstance(members_data, list) or len(members_data) != 3:
+        if not members_data or len(members_data) != 3:
             team.delete()
             return Response({'error': 'Exactly 3 members are required'}, status=status.HTTP_400_BAD_REQUEST)
-        payment_image = request.FILES.get('payment_image', None)
-        if not payment_image:
-            team.delete()
-            return Response({'error': 'payment image is required'}, status=status.HTTP_400_BAD_REQUEST)
-        setattr(team, "payment", payment_image)
-        team.save()
 
         for member_index in range(len(members_data)):
 
