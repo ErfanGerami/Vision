@@ -8,7 +8,9 @@ class StaffMemberSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get('request')
         if obj.image and request:
-            return request.build_absolute_uri(obj.image.url)
+            path = request.build_absolute_uri(obj.image.url).repl
+            path.replace('http://', 'https://')
+            return path
         return None
 
     class Meta:
