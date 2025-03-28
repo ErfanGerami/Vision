@@ -39,7 +39,6 @@ class TeamMember(models.Model):
     university = models.CharField(max_length=128, null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
     major = models.CharField(max_length=128, null=True, blank=True)
-    github = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -60,6 +59,7 @@ class StaffMember(models.Model):
         upload_to='staff_member_images/', null=True, blank=True)
     description = models.CharField(max_length=512, null=True, blank=True)
     role = models.CharField(max_length=100, null=True, blank=True)
+    github = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return self.name
