@@ -9,7 +9,7 @@ class StaffMemberSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if obj.image and request:
             path = request.build_absolute_uri(obj.image.url)
-            path.replace("http://", "https://")
+            path = path.replace("http://", "https://")
             return path
         return None
 
