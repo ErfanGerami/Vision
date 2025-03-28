@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "some secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -32,9 +32,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True  # Allows any domain
+CSRF_TRUSTED_ORIGINS = [
+    "https://iutcvc.ir",
+    "https://www.iutcvc.ir",  # Add both with and without 'www' if applicable
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
 CORS_ALLOW_METHODS = ["*"]
+CSRF_COOKIE_SECURE = True
 
 
 # Application definition
