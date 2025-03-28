@@ -16,6 +16,7 @@ class Link(models.Model):
     url = models.URLField()
     content = models.ForeignKey(
         Content, on_delete=models.CASCADE, related_name='links')
+    type = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.name

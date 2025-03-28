@@ -16,3 +16,10 @@ from django_redis import get_redis_connection
 import random
 from user.permissions import IsVerifiedTeam
 import json
+from .models import *
+
+
+class GetContent(generics.ListAPIView):
+    serializer_class = ContentSerializer
+    queryset = Content.objects.all()
+    permission_classes = [IsAuthenticated, IsVerifiedTeam]

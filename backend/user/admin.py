@@ -16,6 +16,7 @@ class StaffTeamAdmin(admin.ModelAdmin):
 class MemberInline(admin.TabularInline):
     model = TeamMember
     extra = 0
+    can_delete = True
 
 
 @admin.register(Team)
