@@ -6,8 +6,8 @@ ORDER = ['image', 'video', 'link']
 
 def compare(content: Link):
 
-    if (content.type in ORDER):
-        return ORDER.index(content.type)
+    if (content['type'] in ORDER):
+        return ORDER.index(content['type'])
     else:
         return len(ORDER)
 
