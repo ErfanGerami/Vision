@@ -22,5 +22,5 @@ class MemberInline(admin.TabularInline):
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
     fields = ('username', 'password',
-              'verification_completed', 'payment_number')
+              'verification_completed', 'payment_number', 'register_completed')
     inlines = [MemberInline]

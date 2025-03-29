@@ -34,7 +34,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True  # Allows any domain
 CSRF_TRUSTED_ORIGINS = [
     "https://iutcvc.ir",
-    "https://www.iutcvc.ir",  # Add both with and without 'www' if applicable
+    "https://www.iutcvc.ir",
+    "http://www.iutcvc.ir",
+    "http://iutcvc.ir"
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ["*"]
