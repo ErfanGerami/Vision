@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'captcha',
     'user',
-    'content'
+    'content',
+    'drf_yasg',  # <-- Added to allow drf-yasg templates to be discovered
 ]
 
 MIDDLEWARE = [

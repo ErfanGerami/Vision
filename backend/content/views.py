@@ -19,7 +19,15 @@ import json
 from .models import *
 
 
-class GetContent(generics.ListAPIView):
-    serializer_class = ContentSerializer
+class GetAllContent(generics.ListAPIView):
+    serializer_class = ContentListSerializer
     queryset = Content.objects.all()
     permission_classes = [IsAuthenticated, IsVerifiedTeam]
+
+
+class GetContent(generics.RetrieveAPIView):
+    serializer_class = ContentSerializer
+    permission_classes = [IsAuthenticated, IsVerifiedTeam]
+    queryset = Content.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'pk'
