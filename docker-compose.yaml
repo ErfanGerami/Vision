@@ -4,6 +4,7 @@ volumes:
   postgres-db:
   static_volume:
   media_volume:
+  redis_data:
 
 
 services:
@@ -30,11 +31,14 @@ services:
     volumes:
       - postgres-db:/var/lib/postgresql/data
 
-  redis:
     image: redis:6
     ports:
       - "6379:6379"
     restart: always
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 20 1 --loglevel warning --dir /data
+    user: "1001:1001"
 
   backend:
     build: backend
