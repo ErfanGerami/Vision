@@ -39,7 +39,7 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --save 20 1 --loglevel warning --dir /data
-    user: "1001:1001"
+    user: "redis"
 
   backend:
     build: backend
