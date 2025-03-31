@@ -5,8 +5,16 @@ import os
 
 # Create your models here.
 
+# Override username field for Team to allow any characters including "*"
+
 
 class Team(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        help_text="Required. 150 characters or fewer.",
+        validators=[],
+    )
     register_completed = models.BooleanField(default=False)
     verification_completed = models.BooleanField(default=False)
 
@@ -14,6 +22,7 @@ class Team(AbstractUser):
         ext = filename.split('.')[-1]
         filename = f"{instance.id}_{uuid.uuid4()}.{ext}"
         return os.path.join('payment_images/', filename)
+
     payment_number = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
@@ -23,8 +32,8 @@ class Team(AbstractUser):
     def __str__(self):
         res = ""
         for team_member in TeamMember.objects.filter(team=self):
-            res += str(team_member)+" "
-        return ("✔ " if self.verification_completed else "❌ ")+("✔ " if self.register_completed else "❌ ")+self.username+":"+res
+            res += str(team_member) + " "
+        return ("✔ " if self.verification_completed else "❌ ") + ("✔ " if self.register_completed else "❌ ") + self.username + ":" + res
 
 
 class TeamMember(models.Model):
