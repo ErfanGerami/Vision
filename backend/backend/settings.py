@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+
 import os
+from django.core.exceptions import ValidationError
+import re
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -226,3 +229,24 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL", "e.geramizadeh13821359@gmail.com")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+class AllowAllUsernameValidator:
+    def __call__(self, value):
+        if not value:
+            raise ValidationError("This field cannot be empty.")
+        return value
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+AUTH_PASSWORD_VALIDATORS = [
+    # Custom validator
+    'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+]
+
+USERNAME_VALIDATORS = [
+    AllowAllUsernameValidator(),
+]
