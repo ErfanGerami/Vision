@@ -29,6 +29,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "some secret")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
+REGISTER_PERMITED = os.environ.get("DEBUG", "True") == "True"
+
 ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOW_ALL_ORIGINS = True

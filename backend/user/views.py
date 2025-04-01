@@ -18,14 +18,18 @@ import random
 from .permissions import IsVerifiedTeam
 from .helpers import *
 import json
+from django.conf import settings
+
 redis_conn = get_redis_connection("default")
 
 
 class TeamRegisterView(APIView):
     def post(self, request):
-        # result, res = check_captcha(request=request)
-        # if (not result):
-        #     return res
+        if (not settings.REGISTER_PERMITED):
+            return Response({'error': 'Registration is closed'}, status=status.HTTP_400_BAD_REQUEST)
+        result, res = check_captcha(request=request)
+        if (not result):
+            return res
 
         team_name = request.data.get('username')
         team_password = request.data.get('password')
