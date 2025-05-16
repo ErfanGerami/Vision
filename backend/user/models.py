@@ -17,6 +17,7 @@ class Team(AbstractUser):
     )
     register_completed = models.BooleanField(default=False)
     verification_completed = models.BooleanField(default=False)
+    final_register = models.BooleanField(default=False)
 
     def payment_image_upload_to(instance, filename):
         ext = filename.split('.')[-1]
