@@ -34,7 +34,7 @@ class Team(AbstractUser):
         res = ""
         for team_member in TeamMember.objects.filter(team=self):
             res += str(team_member) + " "
-        return ("✔ " if self.verification_completed else "❌ ") + ("✔ " if self.register_completed else "❌ ") + self.username + ":" + res
+        return ("✔ " if self.final_register else "❌ ")+("✔ " if self.verification_completed else "❌ ") + ("✔ " if self.register_completed else "❌ ") + self.username + ":" + res
 
 
 class TeamMember(models.Model):
